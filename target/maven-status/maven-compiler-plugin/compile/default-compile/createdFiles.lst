@@ -1,0 +1,9 @@
+br\com\casadocodigo\loja\model\TipoPreco.class
+br\com\casadocodigo\loja\controller\ProdutosController.class
+br\com\casadocodigo\loja\controller\HomeController.class
+br\com\casadocodigo\loja\model\Preco.class
+br\com\casadocodigo\loja\conf\ServletSpringMVC.class
+br\com\casadocodigo\loja\data\ProdutoDAO.class
+br\com\casadocodigo\loja\model\Produto.class
+br\com\casadocodigo\loja\conf\AppWebConfiguration.class
+br\com\casadocodigo\loja\conf\JPAConfiguration.class

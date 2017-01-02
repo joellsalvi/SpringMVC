@@ -1,0 +1,80 @@
+package br.com.casadocodigo.loja.controller;
+
+import java.util.List;
+
+import javax.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.InitBinder;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import br.com.casadocodigo.loja.data.ProdutoDAO;
+import br.com.casadocodigo.loja.infra.FileRecorder;
+import br.com.casadocodigo.loja.model.Produto;
+import br.com.casadocodigo.loja.model.TipoPreco;
+import br.com.casadocodigo.loja.validation.ProdutoValidation;
+
+@Controller
+@RequestMapping(value = "/produtos")
+public class ProdutosController {
+
+	@Autowired
+	private ProdutoDAO produtoDao;
+
+	@Autowired
+	private FileRecorder fileRecorder;
+
+	@InitBinder
+	public void initBinder(WebDataBinder dataBinder) {
+		dataBinder.addValidators(new ProdutoValidation());
+	}
+
+	@RequestMapping(value = "/form", method = RequestMethod.GET)
+	public ModelAndView form(Produto produto) {
+		ModelAndView modelAndView = new ModelAndView("produtos/form");
+		modelAndView.addObject("tipos", TipoPreco.values());
+		return modelAndView;
+	}
+
+	@RequestMapping(method = RequestMethod.POST)
+	public ModelAndView gravar(MultipartFile sumario, @Valid Produto produto, BindingResult result,
+			RedirectAttributes redirectAttributes) {
+		if (result.hasErrors()) {
+			return form(produto);
+		}
+
+		produto.setSumarioPath(fileRecorder.resolveFile("arquivos-sumario", sumario));
+		produtoDao.gravar(produto);
+		redirectAttributes.addFlashAttribute("msgSucesso", "Produto cadastrado com sucesso!");
+
+		return new ModelAndView("redirect:produtos");
+	}
+
+	@RequestMapping(method = RequestMethod.GET)
+	public ModelAndView listar() {
+		List<Produto> produtos = produtoDao.listar();
+		ModelAndView modelAndView = new ModelAndView("produtos/lista");
+		modelAndView.addObject("produtos", produtos);
+
+		return modelAndView;
+	}
+
+	@RequestMapping("/detalhe/{id}")
+	public ModelAndView detalhe(@PathVariable("id") Integer id) {
+		ModelAndView modelAndView = new ModelAndView("produtos/detalhe");
+
+		Produto produto = produtoDao.findById(id);
+		modelAndView.addObject("produto", produto);
+
+		return modelAndView;
+	}
+
+}
